@@ -27,11 +27,25 @@
     chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
   }
 
-  function getBotResponse(userMessage) {
-    // Replace this with your actual AI chatbot logic (e.g., API call, local processing)
-    // Example: Simple hardcoded responses
-    userMessage = userMessage.toLowerCase();
+  async function getBotResponse(userMessage) {
+    try {
+      const response = await fetch('api.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: userMessage })
+      });
 
+      if (!response.ok) {
+        return 'Error: API request failed';
+      }
+
+      const data = await response.json();
+      return data.response || 'No response from AI';
+    } catch (error) {
+      return 'Error: ' + error.message;
+    }
   }
 
   sendButton.addEventListener('click', () => {
@@ -41,10 +55,10 @@
       userInput.value = '';
 
       // Simulate a bot response (replace with actual AI logic)
-      setTimeout(() => {
-        const botResponse = getBotResponse(message);
+      (async () => {
+        const botResponse = await getBotResponse(message);
         appendMessage(botResponse, 'bot');
-      }, 500); // Simulate a delay for processing
+      })();
     }
   });
 
