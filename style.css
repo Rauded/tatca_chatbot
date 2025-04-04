@@ -36,6 +36,7 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    overflow-y: auto;
 }
 
 #chat-container {
@@ -54,6 +55,7 @@ body {
     border-radius: 20px; /* More rounded message bubbles */
     max-width: 80%; /* Limit message width */
     word-wrap: break-word; /* Wrap long words */
+
 }
 
 .user-message {
@@ -92,6 +94,7 @@ body {
     overflow-y: hidden; /* Hide scrollbar during auto-resize */
     min-height: 40px;
     max-height: 200px; /* Optional max height */
+    position: sticky;
 }
 
 #send-button {

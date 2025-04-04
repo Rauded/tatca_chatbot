@@ -1,9 +1,14 @@
 <?php
+session_start();
 require_once __DIR__ . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 header('Content-Type: application/json');
+
+if (!isset($_SESSION['message_history'])) {
+    $_SESSION['message_history'] = "message history...\n";
+}
 
 $apiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY';
 
@@ -15,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $prompt = trim($input['prompt'] ?? '');
+$_SESSION['message_history'] .= "User: $prompt\n";
 
 if (!$prompt) {
     http_response_code(400);
@@ -26,7 +32,7 @@ $url = 'https://api.openai.com/v1/chat/completions';
 $data = [
     'model' => 'gpt-4o-mini-2024-07-18',
     'messages' => [
-        ['role' => 'user', 'content' => $prompt]
+        ['role' => 'user', 'content' => $_SESSION['message_history']]
     ],
     'temperature' => 0.7,
 ];
@@ -58,7 +64,11 @@ if ($status !== 200) {
 
 $response = json_decode($result, true);
 $botMessage = $response['choices'][0]['message']['content'] ?? '';
+$_SESSION['message_history'] .= "Bot: $botMessage\n";
 
 curl_close($ch);
 
-echo json_encode(['response' => $botMessage]);
+echo json_encode([
+    'response' => $botMessage,
+    'message_history' => $_SESSION['message_history']
+]);
