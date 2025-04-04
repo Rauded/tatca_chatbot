@@ -81,7 +81,7 @@ if (curl_errno($ch)) {
     curl_close($ch);
     // Send an error response
     header('Content-Type: application/json');
-    http_response_code(500); // Internal Server Error
+    http_response_code(5002); // Internal Server Error
     echo json_encode(['error' => 'cURL Error: ' . $curlError]);
     exit;
 }
