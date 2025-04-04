@@ -34,6 +34,9 @@
         ?>
     </ul>
 
+    <button id="scrape-button">Scrape Data</button>
+    <div id="scrape-status" style="margin:10px 0; color:blue;"></div>
+
     <h2>City Chatbot</h2>
     <div id="chat-box" style="height:400px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px;">
         <!-- Chat messages will appear here -->
@@ -43,5 +46,18 @@
         <button type="submit">Send</button>
     </form>
     <script src="/script.js"></script>
+    <script>
+    document.getElementById('scrape-button').addEventListener('click', async function() {
+        const statusDiv = document.getElementById('scrape-status');
+        statusDiv.textContent = 'Scraping in progress...';
+        try {
+            const response = await fetch('/api/scrape', { method: 'POST' });
+            const data = await response.json();
+            statusDiv.textContent = data.message;
+        } catch (e) {
+            statusDiv.textContent = 'Error during scraping.';
+        }
+    });
+    </script>
 </body>
 </html>
