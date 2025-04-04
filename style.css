@@ -7,6 +7,31 @@ body {
     background-color: #f8f8f8; /* Light gray background */
 }
 
+/* Centered title styling */
+.chat-title {
+    text-align:center;
+    margin: 20px 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Add more left padding to chat container */
+#chat-container {
+    padding-left: 40px;
+}
+
+/* Floating input container styling */
+#input-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    box-sizing: border-box;
+    border-radius: 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
 .chat-wrapper {
     width: 50%;
     margin: 0 auto;
