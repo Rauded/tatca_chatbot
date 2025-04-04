@@ -9,3 +9,6 @@
 .DS_Store
 *.bak
 *.tmp
+tatce_scraper.py
+scraper_plan.md
+tatce_articles_with_extracted_text.json
