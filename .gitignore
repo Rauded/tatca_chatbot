@@ -1,18 +1,11 @@
-# Environment variables
+# Ignore environment files
 .env
-
-# PHP
+/data/
+/vendor/
+/node_modules/
 *.log
-vendor/
-composer.lock
-composer.phar
-
-# IDE specific files
 .idea/
 .vscode/
-*.swp
-*.swo
-
-# OS specific files
 .DS_Store
-Thumbs.db
+*.bak
+*.tmp
