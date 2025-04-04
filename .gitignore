@@ -12,3 +12,6 @@
 tatce_scraper.py
 scraper_plan.md
 tatce_articles_with_extracted_text.json
+tatce_articles_with_extracted_text_retry.json
+tatce_articles_with_extracted_text_retry_1.json
+tatce_articles_with_extracted_text_retry_2.json
