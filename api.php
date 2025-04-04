@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 header('Content-Type: application/json');
 
 $apiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY';
@@ -20,7 +24,7 @@ if (!$prompt) {
 
 $url = 'https://api.openai.com/v1/chat/completions';
 $data = [
-    'model' => 'gpt-3.5-turbo',
+    'model' => 'gpt-4o-mini-2024-07-18',
     'messages' => [
         ['role' => 'user', 'content' => $prompt]
     ],
