@@ -41,6 +41,8 @@ body {
 }
 
 #chat-container {
+    display: flex;
+    flex-direction: column;
     padding-left: 40px;
     padding-right: 40px;
     flex-grow: 1;
@@ -72,8 +74,7 @@ body {
     text-align: left; /* Text aligned left inside bubble */
     padding: 10px 15px;
     border-radius: 15px;
-    margin: 8px 20px 8px 20px; /* Reset margin */
-    margin-left: auto; /* Push bubble fully to the right */
+    margin: 8px 100px 8px 0px; /* Reset margin */
     max-width: 80%; /* Prevent overly wide bubbles */
     word-wrap: break-word;
     font-size: 15px;
