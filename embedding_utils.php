@@ -35,7 +35,7 @@ function cosineSimilarity(array $vecA, array $vecB): float|false
 
     // Avoid division by zero
     if ($magnitude == 0) {
-        return 0.0; // Or handle as an error/special case if preferred
+        return 0.0; // Or handle as an error/special case
     }
 
     return $dotProduct / $magnitude;

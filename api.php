@@ -121,7 +121,7 @@ if (!empty($relevantChunks)) {
 // --- Compose System Prompt ---
 $systemPrompt = <<<PROMPT
 systemprompt:(Jseš pomocný asistent pro obec Tatce.
-Odpovídáš na otázky primárně na základě poskytnutého kontextu. Ku kazdej odpovedi ohladom udalosti pridaj konkretny datum a cas.
+Odpovídáš na otázky primárně na základě poskytnutého kontextu. Ku kazdej odpovedi ohladom udalosti pridaj konkretny datum a cas. A kratky popis.
 Pokud kontext obsahuje odpověď, použijiješ ji přímo.
 Pokud kontext neobsahuje odpověď, snažíš se na otázku mile odpovědět, ale upozorníš, že nemáš přímý kontext k odpovědi.
  Vždy odpovídáš česky. Vzdy vloz link k relevantej aktualite.
@@ -150,22 +150,35 @@ $data = [
     'model' => $chatModel,
     'messages' => $messages,
     'temperature' => 0.7,
+    'stream' => true,
 ];
 error_log("Chat Completion API Request Payload: " . json_encode($data));
 
+header('Content-Type: text/event-stream');
+header('Cache-Control: no-cache');
+header('X-Accel-Buffering: no'); // Disable buffering for nginx
+
 $ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Content-Type: application/json',
     'Authorization: Bearer ' . $apiKey,
 ]);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) {
+    // Forward streamed chunk to client immediately
+    echo $chunk;
+    @ob_flush();
+    @flush();
+    return strlen($chunk);
+});
+$success = curl_exec($ch);
 
-$result = curl_exec($ch);
-if ($result === false) {
+if ($success === false) {
     http_response_code(500);
-    echo json_encode(['error' => 'Request failed']);
+    echo "data: " . json_encode(['error' => 'Request failed']) . "\n\n";
+    @ob_flush();
+    @flush();
     curl_close($ch);
     exit;
 }
@@ -173,40 +186,11 @@ if ($result === false) {
 $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 if ($status !== 200) {
     http_response_code($status);
-    echo json_encode(['error' => 'API error', 'status' => $status]);
+    echo "data: " . json_encode(['error' => 'API error', 'status' => $status]) . "\n\n";
+    @ob_flush();
+    @flush();
     curl_close($ch);
     exit;
 }
 
-$response = json_decode($result, true);
-$botMessage = $response['choices'][0]['message']['content'] ?? '';
-
-// Enhance formatting of bot response for better readability
-$botMessage = preg_replace_callback('/(\d+)\.\s+\*\*(.*?)\*\*(.*?)(?=(\d+\.\s+\*\*|$))/s', function ($matches) {
-    $number = $matches[1];
-    $title = trim($matches[2]);
-    $rest = trim($matches[3]);
-
-    // Split details by ' - ' and format as bullet points
-    $details = array_filter(array_map('trim', explode(' - ', $rest)));
-    $formattedDetails = '';
-    foreach ($details as $detail) {
-        $formattedDetails .= "\n   - " . $detail;
-    }
-
-    return "{$number}. **{$title}**{$formattedDetails}\n";
-}, $botMessage);
-
-// Remove any double dots in numbering (e.g., "1.. " -> "1. ")
-$botMessage = preg_replace('/\.\.+/', '.', $botMessage);
-
-// Add extra newline after headers for clarity
-$botMessage = preg_replace('/(### .+?)\s*(\d+\.)/s', "$1\n\n$2", $botMessage);
-$_SESSION['message_history'] .= "Bot: $botMessage\n";
-
 curl_close($ch);
-
-echo json_encode([
-    'response' => $botMessage,
-    'message_history' => $_SESSION['message_history']
-]);

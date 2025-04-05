@@ -33,7 +33,7 @@
     }, 0); // Scroll to bottom after DOM update
   }
 
-  async function getBotResponse(userMessage) {
+  async function getBotResponse(userMessage, onChunk) {
     try {
       const response = await fetch('api.php', {
         method: 'POST',
@@ -43,14 +43,42 @@
         body: JSON.stringify({ prompt: userMessage })
       });
 
-      if (!response.ok) {
-        return 'Error: API request failed';
+      if (!response.ok || !response.body) {
+        onChunk('Error: API request failed');
+        return;
       }
 
-      const data = await response.json();
-      return data.response || 'No response from AI';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+
+        // Process SSE lines
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '').trim();
+            if (dataStr === '[DONE]') continue;
+            try {
+              const dataObj = JSON.parse(dataStr);
+              const delta = dataObj.choices?.[0]?.delta?.content;
+              if (delta) {
+                onChunk(delta);
+              }
+            } catch (e) {
+              console.error('Error parsing chunk JSON', e);
+            }
+          }
+        }
+      }
     } catch (error) {
-      return 'Error: ' + error.message;
+      onChunk('Error: ' + error.message);
     }
   }
 
@@ -60,12 +88,29 @@
       appendMessage(message, 'user');
       userInput.value = '';
       userInput.style.height = '40px';
-      
-      // Simulate a bot response (replace with actual AI logic)
-      (async () => {
-        const botResponse = await getBotResponse(message);
-        appendMessage(botResponse, 'bot');
-      })();
+
+      // Create bot message element immediately
+      const botMessageElem = document.createElement('div');
+      botMessageElem.classList.add('message', 'bot-message');
+      botMessageElem.innerHTML = '';
+      chatContainer.appendChild(botMessageElem);
+
+      // Scroll to bottom
+      setTimeout(() => {
+        chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 0);
+
+      // Buffer for full streamed response
+      let fullResponse = '';
+
+      // Stream bot response
+      getBotResponse(message, (chunk) => {
+        fullResponse += chunk;
+        botMessageElem.innerHTML = marked.parse(fullResponse);
+        // Optional: scroll as new text arrives
+        chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+      });
     }
   });
 
