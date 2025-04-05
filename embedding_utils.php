@@ -1,4 +1,4 @@
-guzzle<?php
+<?php
 /**
  * Calculates the cosine similarity between two vectors (arrays of numbers).
  *

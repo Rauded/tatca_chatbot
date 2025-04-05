@@ -2,13 +2,16 @@
 
 require 'vendor/autoload.php'; // If using Composer for libraries like GuzzleHttp
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
 // --- Configuration ---
 $inputFile = 'chunks.json'; // Input file from chunking step
 $outputFile = 'chunks_with_embeddings.json'; // Output file
-$openAiApiKey = getenv('OPENAI_API_KEY'); // IMPORTANT: Load from environment variable or secure config
+$openAiApiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY'; // IMPORTANT: Load from environment variable or secure config
 $embeddingModel = 'text-embedding-ada-002';
 $openaiApiUrl = 'https://api.openai.com/v1/embeddings';
 $rateLimitDelayMicroseconds = 600000; // 0.6 seconds delay between requests (adjust based on your OpenAI rate limits)

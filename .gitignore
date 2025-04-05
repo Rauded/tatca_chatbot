@@ -19,3 +19,4 @@ tatce_articles_with_extracted_text_retry_3.json
 tatce_articles_with_extracted_text_retry_4.json
 tatce_articles_with_extracted_text_retry_5.json
 chunk_articles.php
+chunks_with_embeddings.json

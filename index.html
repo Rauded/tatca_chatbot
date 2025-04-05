@@ -23,7 +23,9 @@
   function appendMessage(message, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
-    messageDiv.textContent = message;
+    // Convert markdown to HTML
+    const html = marked.parse(message);
+    messageDiv.innerHTML = html;
     chatContainer.appendChild(messageDiv);
     setTimeout(() => {
       chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
@@ -78,6 +80,7 @@
     userInput.style.height = userInput.scrollHeight + 'px';
   });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 </body>
 </html>
