@@ -25,7 +25,10 @@
     messageDiv.classList.add('message', `${sender}-message`);
     messageDiv.textContent = message;
     chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+    setTimeout(() => {
+      chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 0); // Scroll to bottom after DOM update
   }
 
   async function getBotResponse(userMessage) {
@@ -54,7 +57,8 @@
     if (message.trim() !== '') {
       appendMessage(message, 'user');
       userInput.value = '';
-
+      userInput.style.height = '40px';
+      
       // Simulate a bot response (replace with actual AI logic)
       (async () => {
         const botResponse = await getBotResponse(message);
