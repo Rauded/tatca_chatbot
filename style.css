@@ -96,6 +96,7 @@ body {
     overflow-wrap: break-word;
 }
 
+
 /* Markdown styling inside bot messages */
 .bot-message h1,
 .bot-message h2,
@@ -139,8 +140,15 @@ body {
     font-style: italic;
 }
 
+.input-row {
+    display: flex;
+    width: 100%;
+    margin-top: 10px; /* Space between example buttons and input */
+}
+
 #input-container {
     display: flex;
+    flex-direction: column;
     padding: 15px;
     background-color: #e6e0e0; /* Light gray for input area */
     border-top: 1px solid #d1c2c2; /* Subtle top border */
@@ -173,4 +181,27 @@ body {
 
 #send-button:hover {
     background-color: #419f45; /* Darker green on hover */
+}
+
+#example-prompts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.example-button {
+    padding: 8px 12px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.example-button:hover {
+    background-color: #419f45;
 }

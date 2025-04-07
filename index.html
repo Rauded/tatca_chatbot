@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>Tatce Chatbot</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -10,9 +11,20 @@
 <div id="chat-container">
   </div>  
 
-<div id="input-container">
-  <textarea id="user-input" placeholder="Type your message..." rows="1"></textarea>
-  <button id="send-button">Send</button>
+  <div id="input-container">
+    <!-- Example prompts now appear first in the column layout -->
+    <div id="example-prompts">
+        <button class="example-button">Kdy bude nejbližší zber odpadu?</button>
+        <button class="example-button">Jaké jsou aktuální novinky v obci?</button>
+        <button class="example-button">Aktuality z minulého měsíce.</button>
+        <button class="example-button">Jaké kulturní akce se plánují tento měsíc?</button>
+    </div>
+    
+    <!-- Input and send button now in a row below the example buttons -->
+    <div class="input-row">
+        <textarea id="user-input" placeholder="Type your message..."></textarea>
+        <button id="send-button">Send</button>
+    </div>
 </div>
 
 <script>
@@ -123,6 +135,21 @@
   userInput.addEventListener('input', () => {
     userInput.style.height = 'auto';
     userInput.style.height = userInput.scrollHeight + 'px';
+
+    const examplePrompts = document.getElementById('example-prompts');
+    if (userInput.value.trim() !== '') {
+      examplePrompts.style.display = 'none';
+    } else {
+      examplePrompts.style.display = 'grid';
+    }
+  });
+  // Add event listeners to example prompt buttons
+  document.querySelectorAll('.example-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const exampleText = button.textContent;
+      userInput.value = exampleText;
+      sendButton.click();
+    });
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
