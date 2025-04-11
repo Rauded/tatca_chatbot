@@ -1,7 +1,14 @@
 <?php
 
+// -----------------------------------------------------------------------------
+// Script: generate_embeddings.php
+// Purpose: Loads text chunks, sends them to OpenAI API for embedding generation,
+//          and saves the enriched data to a new JSON file.
+// -----------------------------------------------------------------------------
+
 require 'vendor/autoload.php'; // If using Composer for libraries like GuzzleHttp
 
+// Load environment variables from .env file (for API keys, etc.)
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -12,11 +19,12 @@ use GuzzleHttp\Exception\RequestException;
 $inputFile = 'chunks.json'; // Input file from chunking step
 $outputFile = 'chunks_with_embeddings1.json'; // Output file
 $openAiApiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY'; // IMPORTANT: Load from environment variable or secure config
-$embeddingModel = 'text-embedding-ada-002';
-$openaiApiUrl = 'https://api.openai.com/v1/embeddings';
+$embeddingModel = 'text-embedding-ada-002'; // OpenAI embedding model
+$openaiApiUrl = 'https://api.openai.com/v1/embeddings'; // OpenAI API endpoint
 $rateLimitDelayMicroseconds = 600000; // 0.6 seconds delay between requests (adjust based on your OpenAI rate limits)
 
 if (!$openAiApiKey) {
+    // Stop execution if API key is missing
     die("Error: OPENAI_API_KEY environment variable not set.\n");
 }
 
@@ -34,19 +42,20 @@ echo "Loaded " . count($chunks) . " chunks.\n";
 
 // --- Prepare HTTP Client (using GuzzleHttp as an example) ---
 $client = new Client([
-    'timeout' => 30.0, // Request timeout
+    'timeout' => 30.0, // Request timeout in seconds
 ]);
 
 // --- Process Chunks and Get Embeddings ---
-$chunksWithEmbeddings = [];
+$chunksWithEmbeddings = []; // Array to hold enriched chunks
 $processedCount = 0;
 $totalChunks = count($chunks);
 
 foreach ($chunks as $chunk) {
+    // Skip chunks with empty text
     if (empty($chunk['text']) || trim($chunk['text']) === '') {
         echo "Skipping chunk ID {$chunk['chunk_id']} due to empty text.\n";
-        // Add chunk without embedding if needed, or skip entirely
-        // $chunksWithEmbeddings[] = $chunk; // If you want to keep it
+        // Optionally, add chunk without embedding or skip entirely
+        // $chunksWithEmbeddings[] = $chunk;
         continue;
     }
 
@@ -55,6 +64,7 @@ foreach ($chunks as $chunk) {
     echo "Processing chunk " . ($processedCount + 1) . "/$totalChunks (ID: {$chunk['chunk_id']})... ";
 
     try {
+        // Send POST request to OpenAI API to get embedding
         $response = $client->post($openaiApiUrl, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $openAiApiKey,
@@ -66,30 +76,34 @@ foreach ($chunks as $chunk) {
             ],
         ]);
 
+        // Parse API response
         $responseBody = json_decode($response->getBody()->getContents(), true);
 
         if (isset($responseBody['data'][0]['embedding'])) {
-            $chunk['embedding'] = $responseBody['data'][0]['embedding']; // Add embedding vector
+            // Add embedding vector to the chunk
+            $chunk['embedding'] = $responseBody['data'][0]['embedding'];
             $chunksWithEmbeddings[] = $chunk;
             echo "Success.\n";
         } else {
             echo "Failed. Embedding not found in response.\n";
-            // Decide how to handle: skip chunk, retry, add placeholder?
+            // Decide how to handle: skip chunk, retry, add placeholder, etc.
             // For simplicity, we'll skip adding the embedding here
-            // $chunksWithEmbeddings[] = $chunk; // Add without embedding
+            // $chunksWithEmbeddings[] = $chunk;
             error_log("Failed to get embedding for chunk ID {$chunk['chunk_id']}: Embedding data missing in API response.");
         }
 
     } catch (RequestException $e) {
+        // Handle HTTP request errors (network, API, etc.)
         echo "Failed. API Error: " . $e->getMessage() . "\n";
         if ($e->hasResponse()) {
             error_log("API Error Response Body: " . $e->getResponse()->getBody());
         }
-        // Decide how to handle: skip chunk, retry later, stop script?
+        // Decide how to handle: skip chunk, retry later, stop script, etc.
         // For simplicity, we'll skip adding the embedding here
-        // $chunksWithEmbeddings[] = $chunk; // Add without embedding
+        // $chunksWithEmbeddings[] = $chunk;
         error_log("API Request Exception for chunk ID {$chunk['chunk_id']}: " . $e->getMessage());
     } catch (Exception $e) {
+        // Handle any other general errors
         echo "Failed. General Error: " . $e->getMessage() . "\n";
         error_log("General Exception for chunk ID {$chunk['chunk_id']}: " . $e->getMessage());
     }

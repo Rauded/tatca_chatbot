@@ -6,13 +6,23 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- =========================================================================
+     Chatbot Title Bar
+     ======================================================================== -->
 <h1 class="chat-title">TATCE Chatbot</h1>
 
+<!-- =========================================================================
+     Main Chat Container (holds all messages)
+     ======================================================================== -->
 <div id="chat-container">
-  </div>  
+  <!-- Messages will be dynamically appended here by JavaScript -->
+</div>  
 
-  <div id="input-container">
-    <!-- Example prompts now appear first in the column layout -->
+<!-- =========================================================================
+     Input Area (example prompts + user input + send button)
+     ======================================================================== -->
+<div id="input-container">
+    <!-- Example prompts: quick buttons for common questions -->
     <div id="example-prompts">
         <button class="example-button">Kdy bude nejbližší zber odpadu?</button>
         <button class="example-button">Jaké jsou aktuální novinky v obci?</button>
@@ -20,22 +30,31 @@
         <button class="example-button">Jaké kulturní akce se plánují tento měsíc?</button>
     </div>
     
-    <!-- Input and send button now in a row below the example buttons -->
+    <!-- User input row: textarea and send button -->
     <div class="input-row">
         <textarea id="user-input" placeholder="Type your message..."></textarea>
         <button id="send-button">Send</button>
     </div>
 </div>
 
+<!-- =========================================================================
+     Chatbot JavaScript Logic
+     ======================================================================== -->
 <script>
+  // Get references to DOM elements
   const chatContainer = document.getElementById('chat-container');
   const userInput = document.getElementById('user-input');
   const sendButton = document.getElementById('send-button');
 
+  /**
+   * Appends a message to the chat container.
+   * @param {string} message - The message text (may contain markdown).
+   * @param {string} sender - 'user' or 'bot' (for styling).
+   */
   function appendMessage(message, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
-    // Convert markdown to HTML
+    // Convert markdown to HTML using marked.js
     const html = marked.parse(message);
     messageDiv.innerHTML = html;
     chatContainer.appendChild(messageDiv);
@@ -45,6 +64,11 @@
     }, 0); // Scroll to bottom after DOM update
   }
 
+  /**
+   * Sends the user's message to the backend API and streams the bot's response.
+   * @param {string} userMessage - The user's message.
+   * @param {function} onChunk - Callback for each streamed chunk of the response.
+   */
   async function getBotResponse(userMessage, onChunk) {
     try {
       const response = await fetch('api.php', {
@@ -60,6 +84,7 @@
         return;
       }
 
+      // Stream the response using the ReadableStream API
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let fullText = '';
@@ -71,7 +96,7 @@
         const chunk = decoder.decode(value, { stream: true });
         fullText += chunk;
 
-        // Process SSE lines
+        // Process SSE (Server-Sent Events) lines
         const lines = chunk.split('\n');
         for (const line of lines) {
           if (line.startsWith('data: ')) {
@@ -94,6 +119,7 @@
     }
   }
 
+  // Send button click event: send user message and stream bot response
   sendButton.addEventListener('click', () => {
     const message = userInput.value;
     if (message.trim() !== '') {
@@ -101,7 +127,7 @@
       userInput.value = '';
       userInput.style.height = '40px';
 
-      // Create bot message element immediately
+      // Create bot message element immediately (for streaming)
       const botMessageElem = document.createElement('div');
       botMessageElem.classList.add('message', 'bot-message');
       botMessageElem.innerHTML = '';
@@ -116,7 +142,7 @@
       // Buffer for full streamed response
       let fullResponse = '';
 
-      // Stream bot response
+      // Stream bot response and update the message element as chunks arrive
       getBotResponse(message, (chunk) => {
         fullResponse += chunk;
         botMessageElem.innerHTML = marked.parse(fullResponse);
@@ -126,12 +152,14 @@
     }
   });
 
+  // Allow pressing Enter to send the message
   userInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
       sendButton.click();
     }
   });
-  // Auto-resize textarea
+
+  // Auto-resize textarea and hide example prompts when typing
   userInput.addEventListener('input', () => {
     userInput.style.height = 'auto';
     userInput.style.height = userInput.scrollHeight + 'px';
@@ -143,7 +171,8 @@
       examplePrompts.style.display = 'grid';
     }
   });
-  // Add event listeners to example prompt buttons
+
+  // Example prompt buttons: fill textarea and send on click
   document.querySelectorAll('.example-button').forEach(button => {
     button.addEventListener('click', () => {
       const exampleText = button.textContent;
@@ -152,6 +181,7 @@
     });
   });
 </script>
+<!-- Marked.js for Markdown parsing -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 </body>

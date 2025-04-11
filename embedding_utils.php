@@ -17,27 +17,31 @@ function cosineSimilarity(array $vecA, array $vecB): float|false
         return false;
     }
 
-    $dotProduct = 0.0;
-    $normA = 0.0;
-    $normB = 0.0;
+    $dotProduct = 0.0; // Accumulates the sum of products of corresponding elements
+    $normA = 0.0;      // Accumulates the sum of squares for vector A
+    $normB = 0.0;      // Accumulates the sum of squares for vector B
 
+    // Iterate through each dimension of the vectors
     for ($i = 0; $i < $countA; $i++) {
+        // Validate that both elements are numeric
         if (!is_numeric($vecA[$i]) || !is_numeric($vecB[$i])) {
             error_log("Cosine Similarity Error: Vectors must contain only numeric values.");
             return false;
         }
-        $dotProduct += $vecA[$i] * $vecB[$i];
-        $normA += $vecA[$i] * $vecA[$i];
-        $normB += $vecB[$i] * $vecB[$i];
+        $dotProduct += $vecA[$i] * $vecB[$i];   // Product of corresponding elements
+        $normA += $vecA[$i] * $vecA[$i];        // Square of element in A
+        $normB += $vecB[$i] * $vecB[$i];        // Square of element in B
     }
 
+    // Calculate the product of the magnitudes (Euclidean norms) of the vectors
     $magnitude = sqrt($normA) * sqrt($normB);
 
-    // Avoid division by zero
+    // Avoid division by zero (if either vector is zero)
     if ($magnitude == 0) {
-        return 0.0; // Or handle as an error/special case
+        return 0.0; // Return 0 similarity for zero vectors
     }
 
+    // Return the cosine similarity score (between -1 and 1)
     return $dotProduct / $magnitude;
 }
 ?>
