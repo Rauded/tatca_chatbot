@@ -6,21 +6,15 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- =========================================================================
-     Chatbot Title Bar
-     ======================================================================== -->
+
 <h1 class="chat-title">TATCE Chatbot</h1>
 
-<!-- =========================================================================
-     Main Chat Container (holds all messages)
-     ======================================================================== -->
+
 <div id="chat-container">
   <!-- Messages will be dynamically appended here by JavaScript -->
 </div>  
 
-<!-- =========================================================================
-     Input Area (example prompts + user input + send button)
-     ======================================================================== -->
+
 <div id="input-container">
     <!-- Example prompts: quick buttons for common questions -->
     <div id="example-prompts">
@@ -45,14 +39,7 @@
     </div>
 </div>
 
-<!-- =========================================================================
-     Python Embedding Toggle Switch
-     ======================================================================== -->
-<!-- Toggle moved into input row -->
 
-<!-- =========================================================================
-     Chatbot JavaScript Logic
-     ======================================================================== -->
 <script>
   // Get references to DOM elements
   const chatContainer = document.getElementById('chat-container');
@@ -94,7 +81,7 @@
   async function getBotResponse(userMessage, onChunk) {
     try {
       const usePythonEmbedding = document.getElementById('python-embedding-toggle').checked;
-      const response = await fetch('/api/api.php', {
+      const response = await fetch('api.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
