@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/api.php",
+      "dest": "/api/api.php"
+    },
+    {
+      "src": "/api/(?!api\\.php$).*",
+      "status": 404
+    },
+    {
+      "src": "/api.php",
+      "status": 404
+    }
+  ]
+}
