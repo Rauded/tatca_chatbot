@@ -94,7 +94,7 @@
   async function getBotResponse(userMessage, onChunk) {
     try {
       const usePythonEmbedding = document.getElementById('python-embedding-toggle').checked;
-      const response = await fetch('api.php', {
+      const response = await fetch('/api/api.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
