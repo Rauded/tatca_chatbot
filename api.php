@@ -102,6 +102,9 @@ function parse_czech_date($dateStr) {
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 // --- Enhanced API Request Logging ---
 function log_api_request($input, $finalSystemPrompt, $finalUserPrompt, $startDate = null, $endDate = null) {
@@ -179,6 +182,11 @@ $maxContextTokens = 100000;    // Approximate context limit
    HTTP Method Check
    ============================================================================
 */
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Handle CORS preflight
+    http_response_code(200);
+    exit;
+}
 // Only allow POST requests for this API endpoint
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
