@@ -151,6 +151,8 @@ with torch.no_grad():
         for chunk, emb in zip(valid_chunks[i:i+BATCH_SIZE], batch_embeds_cpu):
             chunk_with_embedding = dict(chunk)  # Copy original chunk dict
             chunk_with_embedding["embedding"] = emb
+            # Ensure image_url is always present (set to None if missing)
+            chunk_with_embedding["image_url"] = chunk.get("image_url", None)
             all_embeddings_data.append(chunk_with_embedding)
 
 # --- Save Embeddings using Pickle ---

@@ -16,8 +16,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
 // --- Configuration ---
-$inputFile = 'chunks_12.4.json'; // Input file from chunking step
-$outputFile = 'chunks_with_embeddings_12.4.json'; // Output file
+$inputFile = 'chunks_12.4_converted_with_date_in_text.json'; // Input file from chunking step
+$outputFile = 'chunks_with_embeddings_12.4_added_text_and_image.json'; // Output file
 $openAiApiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY'; // IMPORTANT: Load from environment variable or secure config
 $embeddingModel = 'text-embedding-ada-002'; // OpenAI embedding model
 $openaiApiUrl = 'https://api.openai.com/v1/embeddings'; // OpenAI API endpoint

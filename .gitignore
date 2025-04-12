@@ -36,3 +36,10 @@ czech_model_chunks_embed_full_12.4.pkl
 czech_model_chunks_embed_full.json
 czech_model_chunks_embed_full.pkl
 czech_model_chunks_embed.json
+chunks_12.4_converted_with_date_in_text.json
+chunks_12.4_converted.json
+chunks_with_embeddings_12.4_added_text_and_image.json
+chunks_with_embeddings_12.4_converted_append_date.json
+chunks_with_embeddings_12.4_converted.json
+czech_model_chunks_embed_full_12.4_converted_append_date.json
+czech_model_chunks_embed_full_12.4_converted.json
