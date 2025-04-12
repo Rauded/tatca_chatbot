@@ -25,14 +25,22 @@
     <!-- Example prompts: quick buttons for common questions -->
     <div id="example-prompts">
         <button class="example-button">Kdy bude nejbližší zber odpadu?</button>
-        <button class="example-button">Aktuality z páteho mesíce minulého roku.</button>
+        <button class="example-button">Aktuality z sedmého mesíce minulého roku.</button>
         <button class="example-button">Aktuality z minulého měsíce.</button>
-        <button class="example-button">Jaké kulturní akce se plánují tento měsíc?</button>
+        <button class="example-button">Aktuality tenhle měsíc.</button>
+    </div>
+    <!-- Toggle switch moved outside input container -->
+    <div id="toggle-container-fixed">
+      <label class="switch">
+        <input type="checkbox" id="python-embedding-toggle">
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Use Czech Trained Embedding Model Seznam/retromae-small-cs</span>
     </div>
     
     <!-- User input row: textarea and send button -->
     <div class="input-row">
-        <textarea id="user-input" placeholder="Type your message..."></textarea>
+        <textarea id="user-input" placeholder="Napiste svoji spravu..."></textarea>
         <button id="send-button">Send</button>
     </div>
 </div>
@@ -40,13 +48,7 @@
 <!-- =========================================================================
      Python Embedding Toggle Switch
      ======================================================================== -->
-<div id="toggle-container" style="margin: 10px 0; text-align: center;">
-  <label class="switch">
-    <input type="checkbox" id="python-embedding-toggle">
-    <span class="slider"></span>
-  </label>
-  <span class="toggle-label">Use Czech Trained Embedding Model Seznam/retromae-small-cs</span>
-</div>
+<!-- Toggle moved into input row -->
 
 <!-- =========================================================================
      Chatbot JavaScript Logic
@@ -63,10 +65,19 @@
    * @param {string} sender - 'user' or 'bot' (for styling).
    */
   function appendMessage(message, sender) {
+    // Preprocess: convert plain image URLs to markdown image syntax
+    // Matches URLs ending with image extensions, not already inside markdown/image tags
+    const imageUrlRegex = /(?<!\!\[.*?\]\()(?<!src=['"])(https?:\/\/[^\s]+?\.(?:png|jpg|jpeg|gif|webp|bmp|svg))(?!['"])/gi;
+    const processedMessage = message.replace(imageUrlRegex, (url) => {
+      // If already inside a markdown image, skip
+      if (message.includes(`![](${url})`) || message.includes(`](${url})`)) return url;
+      return `![](${url})`;
+    });
+
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
     // Convert markdown to HTML using marked.js
-    const html = marked.parse(message);
+    const html = marked.parse(processedMessage);
     messageDiv.innerHTML = html;
     chatContainer.appendChild(messageDiv);
     setTimeout(() => {

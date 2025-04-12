@@ -1,10 +1,11 @@
 <?php
 
-// -----------------------------------------------------------------------------
-// Script: generate_embeddings.php
-// Purpose: Loads text chunks, sends them to OpenAI API for embedding generation,
-//          and saves the enriched data to a new JSON file.
-// -----------------------------------------------------------------------------
+/* ============================================================================
+   generate_embeddings.php
+   Purpose: Loads text chunks, sends them to OpenAI API for embedding generation,
+            and saves the enriched data to a new JSON file.
+   ============================================================================
+*/
 
 require 'vendor/autoload.php'; // If using Composer for libraries like GuzzleHttp
 
@@ -15,7 +16,10 @@ $dotenv->load();
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
-// --- Configuration ---
+/* ============================================================================
+   Configuration
+   ============================================================================
+*/
 $inputFile = 'chunks_12.4_converted_with_date_in_text.json'; // Input file from chunking step
 $outputFile = 'chunks_with_embeddings_12.4_added_text_and_image.json'; // Output file
 $openAiApiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY'; // IMPORTANT: Load from environment variable or secure config
@@ -28,7 +32,10 @@ if (!$openAiApiKey) {
     die("Error: OPENAI_API_KEY environment variable not set.\n");
 }
 
-// --- Load Chunk Data ---
+/* ============================================================================
+   Load Chunk Data
+   ============================================================================
+*/
 echo "Loading chunks from: $inputFile\n";
 $jsonData = file_get_contents($inputFile);
 if ($jsonData === false) {
@@ -40,12 +47,18 @@ if ($chunks === null) {
 }
 echo "Loaded " . count($chunks) . " chunks.\n";
 
-// --- Prepare HTTP Client (using GuzzleHttp as an example) ---
+/* ============================================================================
+   Prepare HTTP Client (using GuzzleHttp as an example)
+   ============================================================================
+*/
 $client = new Client([
     'timeout' => 30.0, // Request timeout in seconds
 ]);
 
-// --- Process Chunks and Get Embeddings ---
+/* ============================================================================
+   Process Chunks and Get Embeddings
+   ============================================================================
+*/
 $chunksWithEmbeddings = []; // Array to hold enriched chunks
 $processedCount = 0;
 $totalChunks = count($chunks);
@@ -122,7 +135,10 @@ foreach ($chunks as $chunk) {
     usleep($rateLimitDelayMicroseconds); // IMPORTANT: Respect rate limits!
 }
 
-// --- Save Enriched Data ---
+/* ============================================================================
+   Save Enriched Data
+   ============================================================================
+*/
 echo "Saving chunks with embeddings to: $outputFile\n";
 $outputJson = json_encode($chunksWithEmbeddings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 

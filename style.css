@@ -96,7 +96,7 @@ body {
     max-width: 720px;
     margin: 0 auto;
     padding-top: 0;
-    padding-bottom: 80px; /* Space for input */
+    padding-bottom: 0; /* Space for input */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -110,10 +110,10 @@ body {
     flex-direction: column;
     flex-grow: 1;
     overflow-y: auto;
-    height: 60vh;
+    height: 70vh;
     min-width: 1000px;
-    min-height: 300px;
-    max-height: calc(100vh - 180px);
+    min-height: 500px;
+    max-height: calc(100vh - 80px);
     padding: 20px 24px 20px 24px;
     background-color: #f0f0f0; /* Slightly darker gray for the chat area */
     border-radius: 8px; /* Rounded corners for chat area */
@@ -150,6 +150,20 @@ body {
     word-wrap: break-word;
     font-size: 15px;
     line-height: 1.5;
+}
+
+/* Ensure images in chat messages are always small and consistent */
+.message img,
+.user-message img,
+.bot-message img {
+    max-width: 500px;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: inline-block;
+    border-radius: 8px;
+    margin: 4px 0;
 }
 
 /* Bot message bubble (left-aligned, blue) */
@@ -290,4 +304,24 @@ body {
 }
 .example-button:hover {
     background-color: #419f45;
+/* Fixed toggle switch on the right side of the page */
+#toggle-container-fixed {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    background: #e6e0e0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    border: 1px solid #d1c2c2;
+}
+/* Inline toggle switch in input row */
+.toggle-inline {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
 }
