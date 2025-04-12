@@ -25,7 +25,7 @@
     <!-- Example prompts: quick buttons for common questions -->
     <div id="example-prompts">
         <button class="example-button">Kdy bude nejbližší zber odpadu?</button>
-        <button class="example-button">Jaké jsou aktuální novinky v obci?</button>
+        <button class="example-button">Jaké jsou nejnovější aktuality v naší obci?</button>
         <button class="example-button">Aktuality z minulého měsíce.</button>
         <button class="example-button">Jaké kulturní akce se plánují tento měsíc?</button>
     </div>
@@ -35,6 +35,17 @@
         <textarea id="user-input" placeholder="Type your message..."></textarea>
         <button id="send-button">Send</button>
     </div>
+</div>
+
+<!-- =========================================================================
+     Python Embedding Toggle Switch
+     ======================================================================== -->
+<div id="toggle-container" style="margin: 10px 0; text-align: center;">
+  <label class="switch">
+    <input type="checkbox" id="python-embedding-toggle">
+    <span class="slider"></span>
+  </label>
+  <span class="toggle-label">Use Czech Trained Embedding Model Seznam/retromae-small-cs</span>
 </div>
 
 <!-- =========================================================================
@@ -71,12 +82,13 @@
    */
   async function getBotResponse(userMessage, onChunk) {
     try {
+      const usePythonEmbedding = document.getElementById('python-embedding-toggle').checked;
       const response = await fetch('api.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ prompt: userMessage })
+        body: JSON.stringify({ prompt: userMessage, use_python_embedding: usePythonEmbedding })
       });
 
       if (!response.ok || !response.body) {

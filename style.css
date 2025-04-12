@@ -1,3 +1,47 @@
+/* Toggle Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 54px;
+  height: 28px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 28px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider {
+  background-color: #2196F3;
+}
+.switch input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.toggle-label {
+  font-size: 1rem;
+  vertical-align: middle;
+  user-select: none;
+}
 /* ============================================================================
    Global Layout and Body Styles
    ========================================================================== */
@@ -34,7 +78,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 600px;
+    max-width: 720px;
     box-sizing: border-box;
     border-radius: 25px 25px 0 0;
     box-shadow: 0 -2px 8px rgba(0,0,0,0.12);
@@ -49,7 +93,7 @@ body {
 /* Centered chat wrapper for layout */
 .chat-wrapper {
     width: 100%;
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
     padding-top: 0;
     padding-bottom: 80px; /* Space for input */
@@ -67,16 +111,16 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     height: 60vh;
+    min-width: 1000px;
     min-height: 300px;
     max-height: calc(100vh - 180px);
     padding: 20px 24px 20px 24px;
     background-color: #f0f0f0; /* Slightly darker gray for the chat area */
     border-radius: 8px; /* Rounded corners for chat area */
-    margin: 0 auto;
+    margin: auto;
     outline: none;
     box-sizing: border-box;
-    width: 100%;
-    max-width: 600px;
+    width: 80%;
 }
 
 /* ============================================================================
@@ -86,7 +130,7 @@ body {
     margin-bottom: 15px;
     padding: 12px;
     border-radius: 20px; /* More rounded message bubbles */
-    max-width: 80%; /* Limit message width */
+    max-width: 95%; /* Limit message width (was 80%) */
     word-wrap: break-word; /* Wrap long words */
 }
 
@@ -102,7 +146,7 @@ body {
     padding: 10px 15px;
     border-radius: 15px;
     margin: 8px 100px 8px 0px; /* Reset margin */
-    max-width: 80%; /* Prevent overly wide bubbles */
+    max-width: 95%; /* Prevent overly wide bubbles (was 80%) */
     word-wrap: break-word;
     font-size: 15px;
     line-height: 1.5;
