@@ -1,73 +1,211 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>City Chatbot</title>
+<meta charset="UTF-8">
+<title>Tatce Chatbot</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- =========================================================================
+     Chatbot Title Bar
+     ======================================================================== -->
+<h1 class="chat-title">TATCE Chatbot</h1>
 
+<!-- =========================================================================
+     Main Chat Container (holds all messages)
+     ======================================================================== -->
 <div id="chat-container">
-  </div>
+  <!-- Messages will be dynamically appended here by JavaScript -->
+</div>  
 
+<!-- =========================================================================
+     Input Area (example prompts + user input + send button)
+     ======================================================================== -->
 <div id="input-container">
-  <input type="text" id="user-input" placeholder="Type your message...">
-  <button id="send-button">Send</button>
+    <!-- Example prompts: quick buttons for common questions -->
+    <div id="example-prompts">
+        <button class="example-button">Kdy bude nejbližší zber odpadu?</button>
+        <button class="example-button">Aktuality z sedmého mesíce minulého roku.</button>
+        <button class="example-button">Aktuality z minulého měsíce.</button>
+        <button class="example-button">Aktuality tenhle měsíc.</button>
+    </div>
+    <!-- Toggle switch moved outside input container -->
+    <div id="toggle-container-fixed">
+      <label class="switch">
+        <input type="checkbox" id="python-embedding-toggle">
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Use Czech Trained Embedding Model Seznam/retromae-small-cs</span>
+    </div>
+    
+    <!-- User input row: textarea and send button -->
+    <div class="input-row">
+        <textarea id="user-input" placeholder="Napiste svoji spravu..."></textarea>
+        <button id="send-button">Send</button>
+    </div>
 </div>
 
+<!-- =========================================================================
+     Python Embedding Toggle Switch
+     ======================================================================== -->
+<!-- Toggle moved into input row -->
+
+<!-- =========================================================================
+     Chatbot JavaScript Logic
+     ======================================================================== -->
 <script>
+  // Get references to DOM elements
   const chatContainer = document.getElementById('chat-container');
   const userInput = document.getElementById('user-input');
   const sendButton = document.getElementById('send-button');
 
+  /**
+   * Appends a message to the chat container.
+   * @param {string} message - The message text (may contain markdown).
+   * @param {string} sender - 'user' or 'bot' (for styling).
+   */
   function appendMessage(message, sender) {
+    // Preprocess: convert plain image URLs to markdown image syntax
+    // Matches URLs ending with image extensions, not already inside markdown/image tags
+    const imageUrlRegex = /(?<!\!\[.*?\]\()(?<!src=['"])(https?:\/\/[^\s]+?\.(?:png|jpg|jpeg|gif|webp|bmp|svg))(?!['"])/gi;
+    const processedMessage = message.replace(imageUrlRegex, (url) => {
+      // If already inside a markdown image, skip
+      if (message.includes(`![](${url})`) || message.includes(`](${url})`)) return url;
+      return `![](${url})`;
+    });
+
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
-    messageDiv.textContent = message;
+    // Convert markdown to HTML using marked.js
+    const html = marked.parse(processedMessage);
+    messageDiv.innerHTML = html;
     chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+    setTimeout(() => {
+      chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 0); // Scroll to bottom after DOM update
   }
 
-  async function getBotResponse(userMessage) {
+  /**
+   * Sends the user's message to the backend API and streams the bot's response.
+   * @param {string} userMessage - The user's message.
+   * @param {function} onChunk - Callback for each streamed chunk of the response.
+   */
+  async function getBotResponse(userMessage, onChunk) {
     try {
-      const response = await fetch('api.php', {
+      const usePythonEmbedding = document.getElementById('python-embedding-toggle').checked;
+      const response = await fetch('/api/api.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ prompt: userMessage })
+        body: JSON.stringify({ prompt: userMessage, use_python_embedding: usePythonEmbedding })
       });
 
-      if (!response.ok) {
-        return 'Error: API request failed';
+      if (!response.ok || !response.body) {
+        onChunk('Error: API request failed');
+        return;
       }
 
-      const data = await response.json();
-      return data.response || 'No response from AI';
+      // Stream the response using the ReadableStream API
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+
+        // Process SSE (Server-Sent Events) lines
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '').trim();
+            if (dataStr === '[DONE]') continue;
+            try {
+              const dataObj = JSON.parse(dataStr);
+              const delta = dataObj.choices?.[0]?.delta?.content;
+              if (delta) {
+                onChunk(delta);
+              }
+            } catch (e) {
+              console.error('Error parsing chunk JSON', e);
+            }
+          }
+        }
+      }
     } catch (error) {
-      return 'Error: ' + error.message;
+      onChunk('Error: ' + error.message);
     }
   }
 
+  // Send button click event: send user message and stream bot response
   sendButton.addEventListener('click', () => {
     const message = userInput.value;
     if (message.trim() !== '') {
       appendMessage(message, 'user');
       userInput.value = '';
+      userInput.style.height = '40px';
 
-      // Simulate a bot response (replace with actual AI logic)
-      (async () => {
-        const botResponse = await getBotResponse(message);
-        appendMessage(botResponse, 'bot');
-      })();
+      // Create bot message element immediately (for streaming)
+      const botMessageElem = document.createElement('div');
+      botMessageElem.classList.add('message', 'bot-message');
+      botMessageElem.innerHTML = '';
+      chatContainer.appendChild(botMessageElem);
+
+      // Scroll to bottom
+      setTimeout(() => {
+        chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 0);
+
+      // Buffer for full streamed response
+      let fullResponse = '';
+
+      // Stream bot response and update the message element as chunks arrive
+      getBotResponse(message, (chunk) => {
+        fullResponse += chunk;
+        botMessageElem.innerHTML = marked.parse(fullResponse);
+        // Optional: scroll as new text arrives
+        chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+      });
     }
   });
 
+  // Allow pressing Enter to send the message
   userInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
       sendButton.click();
     }
   });
+
+  // Auto-resize textarea and hide example prompts when typing
+  userInput.addEventListener('input', () => {
+    userInput.style.height = 'auto';
+    userInput.style.height = userInput.scrollHeight + 'px';
+
+    const examplePrompts = document.getElementById('example-prompts');
+    if (userInput.value.trim() !== '') {
+      examplePrompts.style.display = 'none';
+    } else {
+      examplePrompts.style.display = 'grid';
+    }
+  });
+
+  // Example prompt buttons: fill textarea and send on click
+  document.querySelectorAll('.example-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const exampleText = button.textContent;
+      userInput.value = exampleText;
+      sendButton.click();
+    });
+  });
 </script>
+<!-- Marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 </body>
 </html>

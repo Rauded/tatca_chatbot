@@ -5,8 +5,8 @@
 */
 
 session_start(); // Start a new or resume the existing session for tracking user state
-require_once __DIR__ . '/vendor/autoload.php'; // Autoload dependencies (e.g., Dotenv, Guzzle, etc.)
-require_once __DIR__ . '/embedding_utils.php'; // Include utility functions for embedding calculations
+require_once dirname(__DIR__) . '/vendor/autoload.php'; // Autoload dependencies (e.g., Dotenv, Guzzle, etc.)
+require_once dirname(__DIR__) . '/embedding_utils.php'; // Include utility functions for embedding calculations
 
 
 /**
@@ -99,7 +99,7 @@ function parse_czech_date($dateStr) {
 }
 
 // Load environment variables (for API keys, etc.)
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -108,7 +108,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 // --- Enhanced API Request Logging ---
 function log_api_request($input, $finalSystemPrompt, $finalUserPrompt, $startDate = null, $endDate = null) {
-    $logFile = __DIR__ . '/api_requests.log';
+    $logFile = dirname(__DIR__) . '/api_requests.log';
     $timestamp = date('c');
     $clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $method = $_SERVER['REQUEST_METHOD'] ?? 'unknown';
@@ -164,7 +164,7 @@ $apiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY';
    ============================================================================
 */
 $usePythonEmbedding = true; // Set to true to use Python script for query embedding
-$pythonEmbeddingScript = __DIR__ . '/generate_query_embedding.py'; // Path to the Python embedding script
+$pythonEmbeddingScript = dirname(__DIR__) . '/generate_query_embedding.py'; // Path to the Python embedding script
 
 /* ============================================================================
    RAG Configuration
@@ -223,9 +223,9 @@ if (isset($input['use_python_embedding'])) {
 
 // Set knowledge base file based on embedding model selection
 if ($usePythonEmbedding) {
-   $chunksFile = __DIR__ . '/czech_model_chunks_embed_full_12.4_converted_append_date.json';
+   $chunksFile = dirname(__DIR__) . '/czech_model_chunks_embed_full_12.4_converted_append_date.json';
 } else {
-   $chunksFile = __DIR__ . '/chunks_with_embeddings_12.4_added_text_and_image.json';
+   $chunksFile = dirname(__DIR__) . '/chunks_with_embeddings_12.4_added_text_and_image.json';
 }
 
 $time = date('d/m/Y H:i:s');
