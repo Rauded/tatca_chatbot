@@ -174,8 +174,8 @@ $embeddingModel = 'text-embedding-ada-002'; // OpenAI embedding model
 $chatModel = 'gpt-4o-mini-2024-07-18';     // OpenAI chat model
 $embeddingUrl = 'https://api.openai.com/v1/embeddings'; // OpenAI embeddings endpoint
 $chunksFile = null; // Will be set after determining embedding model
-$top_n_chunks = 40;           // Number of top relevant chunks to use
-$similarityThreshold = 0.0;   // Minimum similarity for chunk inclusion
+$top_n_chunks = 20;           // Number of top relevant chunks to use
+$similarityThreshold = 0.5;   // Minimum similarity for chunk inclusion
 $maxContextTokens = 100000;    // Approximate context limit
 
 /* ============================================================================
