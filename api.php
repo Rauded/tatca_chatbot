@@ -1,8 +1,5 @@
 <?php
-/* ============================================================================
-   api.php - RAG API endpoint for answering user queries using OpenAI and local context
-   ============================================================================
-*/
+// api.php - RAG API endpoint for answering user queries using OpenAI and local context
 
 session_start(); // Start a new or resume the existing session for tracking user state
 require_once __DIR__ . '/vendor/autoload.php'; // Autoload dependencies (e.g., Dotenv, Guzzle, etc.)
@@ -10,7 +7,7 @@ require_once __DIR__ . '/embedding_utils.php'; // Include utility functions for 
 
 
 /**
- * Call OpenAI (or compatible) API to extract date range from user prompt.
+ * Call OpenAI API to extract date range from user prompt.
  * Returns ['start_date' => ..., 'end_date' => ...] (YYYY-MM-DD or null).
  */
 function call_openai_date_parser($userPrompt, $apiKey) {
@@ -83,8 +80,9 @@ EOD;
 }
 
 /**
+ * Not neccesary anymore since all date is in YYYY-MM-DD format
  * Parse Czech date string "d. m. Y H:i" to "Y-m-d".
- * Returns "Y-m-d" or null if invalid.
+ * Returns "Y-m-d" or null if invalid
  */
 function parse_czech_date($dateStr) {
     // Try to parse the date string with time (e.g., "12. 4. 2025 15:30")
@@ -144,32 +142,20 @@ function log_api_request($input, $finalSystemPrompt, $finalUserPrompt, $startDat
     file_put_contents($logFile, json_encode($logEntry, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
 }
 
-/* ============================================================================
-   Session Initialization
-   ============================================================================
-*/
+// Session Initialization
 if (!isset($_SESSION['message_history'])) {
    // Initialize message history for the session if not already set
    $_SESSION['message_history'] = "message history...\n";
 }
 
-/* ============================================================================
-   API Key and Model Configuration
-   ============================================================================
-*/
+// API Key and Model Configuration
 $apiKey = $_ENV['OPENAI_API_KEY'] ?? 'YOUR_OPENAI_API_KEY';
 
-/* ============================================================================
-   Embedding Source Configuration
-   ============================================================================
-*/
+// Embedding Source Configuration
 $usePythonEmbedding = true; // Set to true to use Python script for query embedding
 $pythonEmbeddingScript = __DIR__ . '/generate_query_embedding.py'; // Path to the Python embedding script
 
-/* ============================================================================
-   RAG Configuration
-   ============================================================================
-*/
+// RAG Configuration
 $embeddingModel = 'text-embedding-ada-002'; // OpenAI embedding model
 $chatModel = 'gpt-4o-mini-2024-07-18';     // OpenAI chat model
 $embeddingUrl = 'https://api.openai.com/v1/embeddings'; // OpenAI embeddings endpoint
@@ -178,10 +164,7 @@ $top_n_chunks = 20;           // Number of top relevant chunks to use
 $similarityThreshold = 0.5;   // Minimum similarity for chunk inclusion
 $maxContextTokens = 100000;    // Approximate context limit
 
-/* ============================================================================
-   HTTP Method Check
-   ============================================================================
-*/
+// HTTP Method Check
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     // Handle CORS preflight
     http_response_code(200);
@@ -194,17 +177,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-/* ============================================================================
-   Parse Input
-   ============================================================================
-*/
+// Parse Input
 // Read the JSON input from the request body and extract the user prompt
 $input = json_decode(file_get_contents('php://input'), true);
 $prompt = trim($input['prompt'] ?? '');
 
-/* ============================================================================
-   Date Parser LLM Call
-   ============================================================================
+/*
+* Date Parser LLM Call
 */
 // Use the LLM to extract a date range from the user's prompt
 $dateExtraction = call_openai_date_parser($prompt, $apiKey);
@@ -239,10 +218,7 @@ if (!$prompt) {
     exit;
 }
 
-/* ============================================================================
-   Load Chunks with Embeddings (Knowledge Base)
-   ============================================================================
-*/
+// Load Chunks with Embeddings (Knowledge Base)
 $allChunksData = @json_decode(file_get_contents($chunksFile), true);
 if ($allChunksData === null || !is_array($allChunksData)) {
    // Log an error if the file could not be loaded or parsed
@@ -250,10 +226,7 @@ if ($allChunksData === null || !is_array($allChunksData)) {
    $allChunksData = [];
 }
 
-/* ============================================================================
-   Get Embedding for User Query
-   ============================================================================
-*/
+// Get Embedding for User Query
 $queryEmbedding = null;
 if ($usePythonEmbedding) {
     // Use a Python script to generate the embedding for the user query
@@ -311,10 +284,7 @@ if ($usePythonEmbedding) {
     }
 }
 
-/* ============================================================================
-   Find Relevant Chunks by Similarity
-   ============================================================================
-*/
+// Find Relevant Chunks by Similarity
 $relevantChunks = [];
 if ($queryEmbedding !== null && !empty($allChunksData)) {
    $filteredChunksData = $allChunksData;
@@ -360,10 +330,7 @@ if ($queryEmbedding !== null && !empty($allChunksData)) {
    $relevantChunks = array_slice($chunkScores, 0, $top_n_chunks);
 }
 
-/* ============================================================================
-   Build Context String for LLM
-   ============================================================================
-*/
+// Build Context String for LLM
 $contextString = "";
 if (!empty($relevantChunks)) {
    $contextString .= "Relevant context from knowledge base:\n";
@@ -387,10 +354,7 @@ if (!empty($relevantChunks)) {
    $contextString = "No relevant context found in the knowledge base for this query.\n\n";
 }
 
-/* ============================================================================
-   Compose System Prompt (for LLM behavior)
-   ============================================================================
-*/
+// Compose System Prompt (for LLM behavior)
 $systemPrompt = <<<PROMPT
 systemprompt:(Si pomocný asistent pro obec Tatce
 Odpovídáš na otázky primárně na základě poskytnutého kontextu. Ku kazdej odpovedi ohladom udalosti pridaj konkretny datum a cas, kratky popis. vloz aj img url source
@@ -413,35 +377,23 @@ else {
    $systemPrompt = $systemPrompt . $contextString;
    $userPromptAugmented = "User Question: " . $prompt;
 }
-/* ============================================================================
-   Compose User Prompt with Context
-   ============================================================================
-*/
+// Compose User Prompt with Context
 
 // Log the incoming API request, including the final system and user prompts (after all augmentation/context is applied)
 log_api_request($input, $systemPrompt, $userPromptAugmented, $startDate, $endDate);
 
-/* ============================================================================
-   Compose Messages for OpenAI Chat API
-   ============================================================================
-*/
+// Compose Messages for OpenAI Chat API
 // Prepare the messages array for the OpenAI Chat API call
 $messages = [
     ['role' => 'system', 'content' => $systemPrompt],
     ['role' => 'user', 'content' => $userPromptAugmented]
 ];
 
-/* ============================================================================
-   Append to Session History
-   ============================================================================
-*/
+// Append to Session History
 // Add the user's prompt to the session message history
 $_SESSION['message_history'] .= "User: $prompt\n";
 
-/* ============================================================================
-   Final Prompt Check
-   ============================================================================
-*/
+// Final Prompt Check
 // Double-check that the prompt is not empty before proceeding
 if (!$prompt) {
     http_response_code(400);
@@ -449,10 +401,7 @@ if (!$prompt) {
     exit;
 }
 
-/* ============================================================================
-   Prepare OpenAI Chat Completion API Call
-   ============================================================================
-*/
+// Prepare OpenAI Chat Completion API Call
 // Set up the API endpoint and request data for the chat completion
 $url = 'https://api.openai.com/v1/chat/completions';
 $data = [
@@ -463,19 +412,13 @@ $data = [
 ];
 error_log("Chat Completion API Request Payload: " . json_encode($data));
 
-/* ============================================================================
-   Set Headers for Server-Sent Events (SSE) Streaming
-   ============================================================================
-*/
+// Set Headers for Server-Sent Events (SSE) Streaming
 // These headers enable real-time streaming of the LLM response to the client
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 header('X-Accel-Buffering: no'); // Disable buffering for nginx
 
-/* ============================================================================
-   Stream OpenAI Response to Client
-   ============================================================================
-*/
+// Stream OpenAI Response to Client
 // Initialize cURL and stream the response from OpenAI to the client
 error_log("Chat Completion API Request Payload: " . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 $ch = curl_init($url);
@@ -507,10 +450,7 @@ curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$bot_respon
 
 $success = curl_exec($ch);
 
-/* ============================================================================
-   Error Handling for Streaming
-   ============================================================================
-*/
+// Error Handling for Streaming
 // Handle errors in streaming or API response
 if ($success === false) {
     http_response_code(500);
