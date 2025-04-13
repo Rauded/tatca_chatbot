@@ -42,9 +42,7 @@
   vertical-align: middle;
   user-select: none;
 }
-/* ============================================================================
-   Global Layout and Body Styles
-   ========================================================================== */
+/* Global Layout and Body Styles */
 body {
     font-family: sans-serif;
     display: flex;
@@ -53,9 +51,7 @@ body {
     background-color: #f0f0f0; /* Light gray background */
 }
 
-/* ============================================================================
-   Chat Title Bar
-   ========================================================================== */
+/* Chat Title Bar */
 /* Centered title styling */
 .chat-title {
     text-align: center;
@@ -68,9 +64,7 @@ body {
     background-color: #9b1924; /* Deep red for branding */
 }
 
-/* ============================================================================
-   Input Area (Floating at Bottom)
-   ========================================================================== */
+/* Input Area (Floating at Bottom)*/
 /* Floating input container styling */
 #input-container {
     position: fixed;
@@ -87,9 +81,7 @@ body {
     padding-bottom: 8px;
 }
 
-/* ============================================================================
-   Chat Wrapper and Main Chat Area
-   ========================================================================== */
+/* Chat Wrapper and Main Chat Area */
 /* Centered chat wrapper for layout */
 .chat-wrapper {
     width: 100%;
@@ -123,9 +115,7 @@ body {
     width: 80%;
 }
 
-/* ============================================================================
-   Message Bubbles
-   ========================================================================== */
+/* Message Bubbles */
 .message {
     margin-bottom: 15px;
     padding: 12px;
@@ -182,9 +172,7 @@ body {
     overflow-wrap: break-word;
 }
 
-/* ============================================================================
-   Markdown and Rich Content Styling in Bot Messages
-   ========================================================================== */
+/* Markdown and Rich Content Styling in Bot Messages */
 /* Headings inside bot messages */
 .bot-message h1,
 .bot-message h2,
@@ -232,9 +220,7 @@ body {
     font-style: italic;
 }
 
-/* ============================================================================
-   Input Row and Textarea/Button Styling
-   ========================================================================== */
+/*  Input Row and Textarea/Button Styling */
 .input-row {
     display: flex;
     width: 100%;
@@ -280,9 +266,7 @@ body {
     background-color: #419f45; /* Darker green on hover */
 }
 
-/* ============================================================================
-   Example Prompts Section
-   ========================================================================== */
+/*  Example Prompts Section */
 #example-prompts {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
