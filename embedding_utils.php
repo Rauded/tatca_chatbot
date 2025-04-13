@@ -1,9 +1,5 @@
 <?php
-/* ============================================================================
-   embedding_utils.php
-   Utility functions for vector operations (e.g., cosine similarity).
-   ============================================================================
-*/
+//embedding_utils.php - Utility functions for vector operations (e.g., cosine similarity)
 /**
  * Calculates the cosine similarity between two vectors (arrays of numbers).
  *
